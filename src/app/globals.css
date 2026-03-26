@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8f8f6;
+  --foreground: #1e2d3d;
+  --navy: #1e2d3d;
+  --orange: #e8842c;
+  --gray: #6b7280;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.btn-primary {
+  background-color: var(--orange);
+  color: white;
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--navy);
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  border: 2px solid var(--navy);
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: var(--navy);
+  color: white;
+}
