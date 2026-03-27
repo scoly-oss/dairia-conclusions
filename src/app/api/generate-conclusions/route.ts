@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 
@@ -87,27 +87,45 @@ RÈGLES DE RÉDACTION DAIRIA :
 
 Rédige les conclusions complètes maintenant :`
 
-  try {
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 8000,
-      messages: [{ role: 'user', content: prompt }],
-    })
+  const stream = anthropic.messages.stream({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 8000,
+    messages: [{ role: 'user', content: prompt }],
+  })
 
-    const content = message.content[0]
-    if (content.type !== 'text') throw new Error('No text')
+  const encoder = new TextEncoder()
+  const readable = new ReadableStream({
+    async start(controller) {
+      try {
+        for await (const event of stream) {
+          if (
+            event.type === 'content_block_delta' &&
+            event.delta.type === 'text_delta'
+          ) {
+            controller.enqueue(encoder.encode(event.delta.text))
+          }
+        }
 
-    // Update conclusion status in Supabase
-    if (conclusionId) {
-      await supabase
-        .from('conclusions')
-        .update({ statut: 'finalise' })
-        .eq('id', conclusionId)
-    }
+        if (conclusionId) {
+          await supabase
+            .from('conclusions')
+            .update({ statut: 'finalise' })
+            .eq('id', conclusionId)
+        }
 
-    return NextResponse.json({ document: content.text })
-  } catch (e) {
-    console.error('Generation error:', e)
-    return NextResponse.json({ error: 'Erreur de génération' }, { status: 500 })
-  }
+        controller.close()
+      } catch (e) {
+        console.error('Streaming error:', e)
+        controller.error(e)
+      }
+    },
+  })
+
+  return new Response(readable, {
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      'X-Content-Type-Options': 'nosniff',
+    },
+  })
 }
