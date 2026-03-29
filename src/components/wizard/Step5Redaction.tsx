@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { WizardState, ConclusionChef } from '@/types'
+import { useState, useEffect } from 'react'
+import { WizardState, ConclusionChef, PartieDroit } from '@/types'
+import { createClient } from '@/lib/supabase/client'
+import BibliothequeClient from '@/app/bibliotheque/BibliothequeClient'
 
 interface Props {
   state: WizardState
@@ -14,8 +16,30 @@ interface Props {
 export default function Step5Redaction({ state, updateState, onNext, onBack }: Props) {
   const [activeChef, setActiveChef] = useState(0)
   const [loadingSection, setLoadingSection] = useState<string | null>(null)
+  const [showBiblio, setShowBiblio] = useState(false)
+  const [parties, setParties] = useState<PartieDroit[]>([])
+
+  useEffect(() => {
+    if (showBiblio && parties.length === 0) {
+      const supabase = createClient()
+      supabase
+        .from('parties_droit')
+        .select('*')
+        .order('theme')
+        .returns<PartieDroit[]>()
+        .then(({ data }) => { if (data) setParties(data) })
+    }
+  }, [showBiblio, parties.length])
 
   const chefs = state.chefs.filter(c => c.strategie === 'contester')
+
+  const handleInsert = (contenu: string, section: 'droit' | 'fait') => {
+    const field = section === 'droit' ? 'section_droit' : 'section_fait'
+    const chef = chefs[activeChef] as Partial<ConclusionChef>
+    const existing = chef?.[field] || ''
+    updateChef(activeChef, { [field]: existing ? existing + '\n\n' + contenu : contenu })
+    setShowBiblio(false)
+  }
 
   const updateChef = (index: number, updates: Partial<ConclusionChef>) => {
     const allChefs = [...state.chefs]
@@ -88,9 +112,59 @@ export default function Step5Redaction({ state, updateState, onNext, onBack }: P
 
   return (
     <div className="space-y-5">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-1" style={{ color: '#1e2d3d' }}>Rédaction assistée</h2>
-        <p className="text-base" style={{ color: '#6b7280' }}>L&apos;IA génère les sections EN DROIT et EN FAIT pour chaque chef contesté</p>
+      {/* Bibliothèque modal */}
+      {showBiblio && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-8 overflow-y-auto"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          onClick={e => { if (e.target === e.currentTarget) setShowBiblio(false) }}
+        >
+          <div
+            className="bg-white w-full max-w-3xl my-4"
+            style={{ borderRadius: '16px', border: '1px solid #e5e7eb', boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}
+          >
+            <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid #f3f4f6' }}>
+              <div>
+                <h3 className="font-bold text-base" style={{ color: '#1e2d3d' }}>📚 Bibliothèque de parties en droit</h3>
+                <p className="text-sm mt-0.5" style={{ color: '#6b7280' }}>
+                  Cliquez sur → EN DROIT ou → EN FAIT pour insérer dans le chef actif
+                </p>
+              </div>
+              <button
+                onClick={() => setShowBiblio(false)}
+                className="text-lg font-semibold w-9 h-9 flex items-center justify-center rounded-xl transition-colors"
+                style={{ color: '#6b7280', backgroundColor: '#f3f4f6' }}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-6 max-h-[70vh] overflow-y-auto">
+              {parties.length === 0 ? (
+                <div className="text-center py-10" style={{ color: '#6b7280' }}>Chargement…</div>
+              ) : (
+                <BibliothequeClient
+                  parties={parties}
+                  onInsert={handleInsert}
+                  insertMode
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold mb-1" style={{ color: '#1e2d3d' }}>Rédaction assistée</h2>
+          <p className="text-base" style={{ color: '#6b7280' }}>L&apos;IA génère les sections EN DROIT et EN FAIT pour chaque chef contesté</p>
+        </div>
+        <button
+          onClick={() => setShowBiblio(true)}
+          className="flex-shrink-0 flex items-center gap-1.5 text-sm font-semibold px-3 py-2 rounded-xl transition-colors"
+          style={{ backgroundColor: 'white', color: '#1e2d3d', border: '1.5px solid #e5e7eb' }}
+        >
+          📚 Bibliothèque
+        </button>
       </div>
 
       {/* Chef tabs */}

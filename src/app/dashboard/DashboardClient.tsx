@@ -40,6 +40,13 @@ export default function DashboardClient({ conclusions, userEmail }: { conclusion
             </div>
           </div>
           <div className="flex items-center gap-3 sm:gap-5">
+            <Link
+              href="/bibliotheque"
+              className="hidden sm:flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors"
+              style={{ color: '#1e2d3d', border: '1.5px solid #e5e7eb', backgroundColor: 'white' }}
+            >
+              📚 Bibliothèque
+            </Link>
             <span className="hidden sm:block text-sm" style={{ color: '#6b7280' }}>{userEmail}</span>
             <button
               onClick={handleLogout}
