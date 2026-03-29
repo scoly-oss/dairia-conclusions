@@ -153,7 +153,7 @@ export default function Step1Infos({ state, updateState, onNext }: Props) {
       {/* Salarié demandeur */}
       <div className="bg-white p-6" style={{ borderRadius: '14px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
         <h3 className="card-title">Salarié demandeur (partie adverse)</h3>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="form-label">Civilité</label>
             <select

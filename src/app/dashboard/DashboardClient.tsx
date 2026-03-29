@@ -74,7 +74,7 @@ export default function DashboardClient({ conclusions, userEmail }: { conclusion
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 sm:gap-5 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 mb-8">
           {[
             { label: 'Total', value: conclusions.length, icon: '📁' },
             { label: 'En cours', value: conclusions.filter(c => c.statut === 'en_cours').length, icon: '⚡', accent: '#e8842c' },
