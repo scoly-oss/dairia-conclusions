@@ -44,7 +44,7 @@ export default function DashboardClient({ conclusions, userEmail }: { conclusion
 
       <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Hero */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold mb-1" style={{ color: '#1e2d3d' }}>Conclusions prud'homales</h1>
             <p className="text-sm" style={{ color: '#6b7280' }}>Générez vos conclusions en défense employeur avec l'IA</p>
@@ -60,7 +60,7 @@ export default function DashboardClient({ conclusions, userEmail }: { conclusion
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
             { label: 'Total', value: conclusions.length },
             { label: 'En cours', value: conclusions.filter(c => c.statut === 'en_cours').length },
@@ -98,7 +98,7 @@ export default function DashboardClient({ conclusions, userEmail }: { conclusion
                   <Link
                     key={c.id}
                     href={`/conclusions/${c.id}`}
-                    className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 hover:bg-gray-50 transition-colors gap-2"
                   >
                     <div>
                       <p className="font-medium text-sm mb-0.5" style={{ color: '#1e2d3d' }}>

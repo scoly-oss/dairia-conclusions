@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 
-export default async function ConclusionPage({ params }: { params: { id: string } }) {
+export default async function ConclusionPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -10,7 +11,7 @@ export default async function ConclusionPage({ params }: { params: { id: string 
   const { data: conclusion } = await supabase
     .from('conclusions')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('user_id', user.id)
     .single()
 
@@ -19,7 +20,7 @@ export default async function ConclusionPage({ params }: { params: { id: string 
   const { data: chefs } = await supabase
     .from('conclusions_chefs')
     .select('*')
-    .eq('conclusion_id', params.id)
+    .eq('conclusion_id', id)
     .order('ordre')
 
   const statusLabels: Record<string, { label: string; color: string; bg: string }> = {

@@ -49,7 +49,7 @@ export default function Step1Infos({ state, updateState, onNext }: Props) {
       {/* Juridiction */}
       <div className="bg-white rounded-xl border border-gray-100 p-6">
         <h3 className="font-semibold mb-4 text-sm" style={{ color: '#1e2d3d' }}>Audience</h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium mb-1.5" style={{ color: '#6b7280' }}>Juridiction *</label>
             <select
@@ -96,7 +96,7 @@ export default function Step1Infos({ state, updateState, onNext }: Props) {
       {/* Société défenderesse */}
       <div className="bg-white rounded-xl border border-gray-100 p-6">
         <h3 className="font-semibold mb-4 text-sm" style={{ color: '#1e2d3d' }}>Société défenderesse (votre client)</h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="col-span-2">
             <label className="block text-xs font-medium mb-1.5" style={{ color: '#6b7280' }}>Raison sociale *</label>
             <input
@@ -153,7 +153,7 @@ export default function Step1Infos({ state, updateState, onNext }: Props) {
       {/* Salarié demandeur */}
       <div className="bg-white rounded-xl border border-gray-100 p-6">
         <h3 className="font-semibold mb-4 text-sm" style={{ color: '#1e2d3d' }}>Salarié demandeur (partie adverse)</h3>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-medium mb-1.5" style={{ color: '#6b7280' }}>Civilité</label>
             <select
@@ -191,7 +191,7 @@ export default function Step1Infos({ state, updateState, onNext }: Props) {
       {/* Avocat adverse */}
       <div className="bg-white rounded-xl border border-gray-100 p-6">
         <h3 className="font-semibold mb-4 text-sm" style={{ color: '#1e2d3d' }}>Avocat adverse</h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium mb-1.5" style={{ color: '#6b7280' }}>Nom de l'avocat</label>
             <input
