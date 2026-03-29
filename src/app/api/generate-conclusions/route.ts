@@ -1,13 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth-guard'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+const MAX_BODY_SIZE = 50_000 // 50 KB
+
 export async function POST(request: NextRequest) {
-  const { conclusion, chefs, pieces, conclusionId } = await request.json()
+  // Auth check
+  const { user, error: authError } = await requireAuth()
+  if (authError) return authError
+
+  // Rate limiting: 10 full generations per hour per user
+  if (!checkRateLimit(`generate-conclusions:${user!.id}`, { limit: 10, windowSec: 3600 })) {
+    return NextResponse.json(
+      { error: 'Trop de requêtes. Réessayez dans une heure.' },
+      { status: 429 }
+    )
+  }
+
+  // Input size validation
+  const contentLength = request.headers.get('content-length')
+  if (contentLength && parseInt(contentLength) > MAX_BODY_SIZE) {
+    return NextResponse.json({ error: 'Requête trop volumineuse' }, { status: 413 })
+  }
+
+  const body = await request.json()
+  const { conclusion, chefs, pieces, conclusionId } = body
+
+  if (!conclusion || !conclusionId) {
+    return NextResponse.json({ error: 'Données manquantes' }, { status: 400 })
+  }
 
   const supabase = await createClient()
+
+  // Verify the user owns this conclusion (defense in depth — RLS also enforces this)
+  const { data: ownerCheck } = await supabase
+    .from('conclusions')
+    .select('id')
+    .eq('id', conclusionId)
+    .eq('user_id', user!.id)
+    .single()
+
+  if (!ownerCheck) {
+    return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
+  }
 
   // Fetch parties_droit from library for relevant themes
   const { data: partiesDroit } = await supabase
@@ -98,12 +137,11 @@ Rédige les conclusions complètes maintenant :`
     if (content.type !== 'text') throw new Error('No text')
 
     // Update conclusion status in Supabase
-    if (conclusionId) {
-      await supabase
-        .from('conclusions')
-        .update({ statut: 'finalise' })
-        .eq('id', conclusionId)
-    }
+    await supabase
+      .from('conclusions')
+      .update({ statut: 'finalise' })
+      .eq('id', conclusionId)
+      .eq('user_id', user!.id)
 
     return NextResponse.json({ document: content.text })
   } catch (e) {
