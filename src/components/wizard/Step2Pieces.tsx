@@ -13,6 +13,7 @@ interface Props {
 
 export default function Step2Pieces({ state, updateState, onNext, onBack }: Props) {
   const [uploading, setUploading] = useState(false)
+  const [extractError, setExtractError] = useState<string | null>(null)
 
   const pieces = state.pieces || []
 
@@ -49,17 +50,27 @@ export default function Step2Pieces({ state, updateState, onNext, onBack }: Prop
     if (!file) return
 
     setUploading(true)
-    // Read file content for text extraction (for PDF/DOCX we'll use the file name for now)
+    setExtractError(null)
     addPiece(file.name.replace(/\.[^.]+$/, ''), 'conclusions_adverses', file)
 
-    // For text files, extract content
-    if (file.type === 'text/plain') {
-      const text = await file.text()
-      updateState({ conclusionsAdversesText: text })
-    } else {
-      // For PDF/DOCX, we'll analyze in step 3 via AI
-      updateState({ conclusionsAdversesText: `[Fichier uploadé: ${file.name}]` })
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/extract-text', { method: 'POST', body: formData })
+      const data = await res.json()
+
+      if (data.text) {
+        updateState({ conclusionsAdversesText: data.text })
+      } else {
+        setExtractError(data.error || 'Erreur lors de l\'extraction du texte')
+        updateState({ conclusionsAdversesText: '' })
+      }
+    } catch {
+      setExtractError('Impossible d\'extraire le texte. Vérifiez votre connexion.')
+      updateState({ conclusionsAdversesText: '' })
     }
+
     setUploading(false)
     e.target.value = ''
   }
@@ -99,6 +110,22 @@ export default function Step2Pieces({ state, updateState, onNext, onBack }: Prop
           </label>
         </div>
 
+        {extractError && (
+          <div className="mb-3 p-3 rounded-lg bg-red-50 border border-red-200">
+            <p className="text-xs text-red-600">{extractError}</p>
+          </div>
+        )}
+
+        {uploading && (
+          <div className="mb-3 flex items-center gap-2 text-xs" style={{ color: '#e8842c' }}>
+            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            Extraction du texte en cours...
+          </div>
+        )}
+
         {piecesByType.conclusions_adverses.length > 0 ? (
           <div className="space-y-2">
             {piecesByType.conclusions_adverses.map(p => (
@@ -106,6 +133,11 @@ export default function Step2Pieces({ state, updateState, onNext, onBack }: Prop
                 <div className="flex items-center gap-2">
                   <span className="text-lg">📄</span>
                   <span className="text-sm font-medium" style={{ color: '#1e2d3d' }}>{p.titre}</span>
+                  {state.conclusionsAdversesText && (
+                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#dcfce7', color: '#16a34a' }}>
+                      ✓ Texte extrait
+                    </span>
+                  )}
                 </div>
                 <button onClick={() => removePiece(p.id!)} className="text-xs" style={{ color: '#6b7280' }}>✕</button>
               </div>
