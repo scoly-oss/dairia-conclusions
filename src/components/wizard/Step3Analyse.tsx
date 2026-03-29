@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { WizardState, ConclusionChef } from '@/types'
 
 interface Props {
@@ -39,7 +39,7 @@ export default function Step3Analyse({ state, updateState, onNext, onBack }: Pro
 
   const chefs = state.chefs || []
 
-  const analyseWithAI = async () => {
+  const analyseWithAI = useCallback(async () => {
     setLoading(true)
     try {
       const response = await fetch('/api/analyse-conclusions', {
@@ -61,7 +61,15 @@ export default function Step3Analyse({ state, updateState, onNext, onBack }: Pro
     } finally {
       setLoading(false)
     }
-  }
+  }, [state.conclusionsAdversesText, state.conclusion, updateState])
+
+  // Auto-trigger analysis on mount if text is available and no chefs yet
+  useEffect(() => {
+    if (state.conclusionsAdversesText && chefs.length === 0) {
+      analyseWithAI()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const updateChef = (index: number, updates: Partial<ConclusionChef>) => {
     const updated = [...chefs]
@@ -94,41 +102,47 @@ export default function Step3Analyse({ state, updateState, onNext, onBack }: Pro
         <p className="text-base" style={{ color: '#6b7280' }}>L&apos;IA extrait les chefs de demande. Vérifiez et corrigez si nécessaire.</p>
       </div>
 
-      {/* AI Analysis */}
+      {/* AI Analysis — shown when no chefs yet */}
       {!analysed && chefs.length === 0 && (
         <div className="bg-white p-10 text-center" style={{ borderRadius: '14px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-          <div className="text-5xl mb-4">🤖</div>
-          <h3 className="text-lg font-bold mb-2" style={{ color: '#1e2d3d' }}>Analyse par l&apos;IA</h3>
+          <div className="text-5xl mb-4">{loading ? '⏳' : '🤖'}</div>
+          <h3 className="text-lg font-bold mb-2" style={{ color: '#1e2d3d' }}>
+            {loading ? 'Analyse en cours…' : 'Analyse par l\'IA'}
+          </h3>
           <p className="text-base mb-8" style={{ color: '#6b7280' }}>
-            {state.conclusionsAdversesText
+            {loading
+              ? 'Claude extrait les chefs de demande…'
+              : state.conclusionsAdversesText
               ? 'Les conclusions adverses sont prêtes à être analysées'
               : 'Aucune conclusion adverse uploadée — vous pouvez ajouter les chefs manuellement'}
           </p>
-          <div className="flex gap-3 justify-center flex-wrap">
-            {state.conclusionsAdversesText && (
+          {loading && (
+            <div className="flex justify-center mb-6">
+              <svg className="animate-spin h-8 w-8" viewBox="0 0 24 24" style={{ color: '#e8842c' }}>
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            </div>
+          )}
+          {!loading && (
+            <div className="flex gap-3 justify-center flex-wrap">
+              {state.conclusionsAdversesText && (
+                <button
+                  onClick={analyseWithAI}
+                  disabled={loading}
+                  className="btn-primary"
+                >
+                  🤖 Analyser avec l&apos;IA
+                </button>
+              )}
               <button
-                onClick={analyseWithAI}
-                disabled={loading}
-                className="btn-primary"
+                onClick={() => setShowAddManual(true)}
+                className="btn-secondary"
               >
-                {loading ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    Analyse en cours…
-                  </>
-                ) : '🤖 Analyser avec l\'IA'}
+                + Ajouter manuellement
               </button>
-            )}
-            <button
-              onClick={() => setShowAddManual(true)}
-              className="btn-secondary"
-            >
-              + Ajouter manuellement
-            </button>
-          </div>
+            </div>
+          )}
         </div>
       )}
 

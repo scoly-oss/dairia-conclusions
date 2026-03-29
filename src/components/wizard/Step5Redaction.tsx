@@ -14,21 +14,24 @@ interface Props {
 export default function Step5Redaction({ state, updateState, onNext, onBack }: Props) {
   const [activeChef, setActiveChef] = useState(0)
   const [loadingSection, setLoadingSection] = useState<string | null>(null)
+  const [generateAllProgress, setGenerateAllProgress] = useState<string | null>(null)
 
   const chefs = state.chefs.filter(c => c.strategie === 'contester')
 
+  const getRealIndex = (contestedIndex: number) => {
+    let count = 0
+    for (let j = 0; j < state.chefs.length; j++) {
+      if (state.chefs[j].strategie === 'contester') {
+        if (count === contestedIndex) return j
+        count++
+      }
+    }
+    return -1
+  }
+
   const updateChef = (index: number, updates: Partial<ConclusionChef>) => {
     const allChefs = [...state.chefs]
-    const realIndex = state.chefs.findIndex((c, i) => {
-      let contestedCount = 0
-      for (let j = 0; j < state.chefs.length; j++) {
-        if (state.chefs[j].strategie === 'contester') {
-          if (contestedCount === index) return j === i
-          contestedCount++
-        }
-      }
-      return false
-    })
+    const realIndex = getRealIndex(index)
     if (realIndex !== -1) {
       allChefs[realIndex] = { ...allChefs[realIndex], ...updates }
       updateState({ chefs: allChefs })
@@ -61,6 +64,55 @@ export default function Step5Redaction({ state, updateState, onNext, onBack }: P
     }
   }
 
+  const generateAll = async () => {
+    for (let i = 0; i < chefs.length; i++) {
+      setActiveChef(i)
+
+      setGenerateAllProgress(`Chef ${i + 1}/${chefs.length} — EN DROIT…`)
+      const keyDroit = `${i}-droit`
+      setLoadingSection(keyDroit)
+      try {
+        const r1 = await fetch('/api/generate-section', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chef: chefs[i],
+            section: 'droit',
+            dossierInfo: state.conclusion,
+            pieces: state.pieces,
+          }),
+        })
+        const d1 = await r1.json()
+        if (d1.content) updateChef(i, { section_droit: d1.content })
+      } catch (e) {
+        console.error(e)
+      }
+      setLoadingSection(null)
+
+      setGenerateAllProgress(`Chef ${i + 1}/${chefs.length} — EN FAIT…`)
+      const keyFait = `${i}-fait`
+      setLoadingSection(keyFait)
+      try {
+        const r2 = await fetch('/api/generate-section', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chef: chefs[i],
+            section: 'fait',
+            dossierInfo: state.conclusion,
+            pieces: state.pieces,
+          }),
+        })
+        const d2 = await r2.json()
+        if (d2.content) updateChef(i, { section_fait: d2.content })
+      } catch (e) {
+        console.error(e)
+      }
+      setLoadingSection(null)
+    }
+    setGenerateAllProgress(null)
+  }
+
   if (chefs.length === 0) {
     return (
       <div className="space-y-5">
@@ -85,12 +137,33 @@ export default function Step5Redaction({ state, updateState, onNext, onBack }: P
   }
 
   const currentChef = chefs[activeChef]
+  const isGeneratingAll = generateAllProgress !== null
 
   return (
     <div className="space-y-5">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-1" style={{ color: '#1e2d3d' }}>Rédaction assistée</h2>
-        <p className="text-base" style={{ color: '#6b7280' }}>L&apos;IA génère les sections EN DROIT et EN FAIT pour chaque chef contesté</p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-2xl font-bold mb-1" style={{ color: '#1e2d3d' }}>Rédaction assistée</h2>
+            <p className="text-base" style={{ color: '#6b7280' }}>L&apos;IA génère les sections EN DROIT et EN FAIT pour chaque chef contesté</p>
+          </div>
+          <button
+            onClick={generateAll}
+            disabled={isGeneratingAll}
+            className="btn-primary flex-shrink-0"
+            style={{ padding: '0.625rem 1.25rem' }}
+          >
+            {isGeneratingAll ? (
+              <>
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                {generateAllProgress}
+              </>
+            ) : '⚡ Tout générer'}
+          </button>
+        </div>
       </div>
 
       {/* Chef tabs */}
@@ -123,7 +196,7 @@ export default function Step5Redaction({ state, updateState, onNext, onBack }: P
               </div>
               <button
                 onClick={() => generateSection(activeChef, 'droit')}
-                disabled={loadingSection === `${activeChef}-droit`}
+                disabled={!!loadingSection}
                 className="btn-primary"
                 style={{ padding: '0.5rem 1rem' }}
               >
@@ -161,7 +234,7 @@ Elle doit citer :
               </div>
               <button
                 onClick={() => generateSection(activeChef, 'fait')}
-                disabled={loadingSection === `${activeChef}-fait`}
+                disabled={!!loadingSection}
                 className="btn-primary"
                 style={{ padding: '0.5rem 1rem' }}
               >
