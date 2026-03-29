@@ -34,6 +34,9 @@ export default function DashboardClient({ conclusions, userEmail }: { conclusion
             <span className="font-bold text-lg" style={{ color: '#1e2d3d' }}>DAIRIA Conclusions</span>
           </div>
           <div className="flex items-center gap-4">
+            <Link href="/bibliotheque" className="text-sm font-medium hover:opacity-80" style={{ color: '#6b7280' }}>
+              Bibliothèque
+            </Link>
             <span className="text-sm" style={{ color: '#6b7280' }}>{userEmail}</span>
             <button onClick={handleLogout} className="text-sm font-medium" style={{ color: '#6b7280' }}>
               Déconnexion
