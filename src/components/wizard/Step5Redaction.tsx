@@ -63,20 +63,20 @@ export default function Step5Redaction({ state, updateState, onNext, onBack }: P
 
   if (chefs.length === 0) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-xl font-bold mb-1" style={{ color: '#1e2d3d' }}>Rédaction assistée</h2>
+      <div className="space-y-5">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold mb-1" style={{ color: '#1e2d3d' }}>Rédaction assistée</h2>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-8 text-center">
-          <p className="text-sm mb-4" style={{ color: '#6b7280' }}>
+        <div className="bg-white p-10 text-center" style={{ borderRadius: '14px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+          <p className="text-base mb-6" style={{ color: '#6b7280' }}>
             Aucun chef de demande à contester. Passez à la génération.
           </p>
-          <button onClick={onNext} className="px-6 py-3 rounded-lg font-semibold text-white text-sm" style={{ backgroundColor: '#e8842c' }}>
+          <button onClick={onNext} className="btn-primary">
             Générer les conclusions →
           </button>
         </div>
         <div className="flex justify-start">
-          <button onClick={onBack} className="px-6 py-3 rounded-lg font-semibold text-sm border-2" style={{ color: '#1e2d3d', borderColor: '#1e2d3d' }}>
+          <button onClick={onBack} className="btn-secondary">
             ← Retour
           </button>
         </div>
@@ -87,26 +87,26 @@ export default function Step5Redaction({ state, updateState, onNext, onBack }: P
   const currentChef = chefs[activeChef]
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold mb-1" style={{ color: '#1e2d3d' }}>Rédaction assistée</h2>
-        <p className="text-sm" style={{ color: '#6b7280' }}>L'IA génère les sections EN DROIT et EN FAIT pour chaque chef contesté</p>
+    <div className="space-y-5">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold mb-1" style={{ color: '#1e2d3d' }}>Rédaction assistée</h2>
+        <p className="text-base" style={{ color: '#6b7280' }}>L&apos;IA génère les sections EN DROIT et EN FAIT pour chaque chef contesté</p>
       </div>
 
       {/* Chef tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="flex gap-2 overflow-x-auto pb-2">
         {chefs.map((chef, i) => (
           <button
             key={chef.id || i}
             onClick={() => setActiveChef(i)}
-            className="flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+            className="flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
             style={{
               backgroundColor: activeChef === i ? '#1e2d3d' : 'white',
               color: activeChef === i ? 'white' : '#6b7280',
-              border: `1px solid ${activeChef === i ? '#1e2d3d' : '#e5e7eb'}`,
+              border: `1.5px solid ${activeChef === i ? '#1e2d3d' : '#e5e7eb'}`,
             }}
           >
-            {i + 1}. {chef.chef_demande?.slice(0, 30)}{(chef.chef_demande?.length || 0) > 30 ? '...' : ''}
+            {i + 1}. {chef.chef_demande?.slice(0, 30)}{(chef.chef_demande?.length || 0) > 30 ? '…' : ''}
           </button>
         ))}
       </div>
@@ -115,25 +115,34 @@ export default function Step5Redaction({ state, updateState, onNext, onBack }: P
       {currentChef && (
         <div className="space-y-4">
           {/* EN DROIT */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-sm" style={{ color: '#1e2d3d' }}>
-                EN DROIT — {currentChef.chef_demande}
-              </h3>
+          <div className="bg-white p-6" style={{ borderRadius: '14px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-bold text-base" style={{ color: '#1e2d3d' }}>EN DROIT</h3>
+                <p className="text-sm" style={{ color: '#6b7280' }}>{currentChef.chef_demande}</p>
+              </div>
               <button
                 onClick={() => generateSection(activeChef, 'droit')}
                 disabled={loadingSection === `${activeChef}-droit`}
-                className="text-xs px-3 py-1.5 rounded-lg font-medium text-white disabled:opacity-50"
-                style={{ backgroundColor: '#e8842c' }}
+                className="btn-primary"
+                style={{ padding: '0.5rem 1rem' }}
               >
-                {loadingSection === `${activeChef}-droit` ? '⏳ Génération...' : '🤖 Générer'}
+                {loadingSection === `${activeChef}-droit` ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Génération…
+                  </>
+                ) : '🤖 Générer'}
               </button>
             </div>
             <textarea
               value={currentChef.section_droit || ''}
               onChange={e => updateChef(activeChef, { section_droit: e.target.value })}
-              className="w-full px-3 py-3 rounded-lg border border-gray-200 text-sm focus:outline-none resize-none"
-              rows={10}
+              className="form-input"
+              rows={12}
               placeholder="La section EN DROIT sera générée par l'IA ou peut être saisie manuellement.
 
 Elle doit citer :
@@ -144,25 +153,34 @@ Elle doit citer :
           </div>
 
           {/* EN FAIT */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-sm" style={{ color: '#1e2d3d' }}>
-                EN FAIT — {currentChef.chef_demande}
-              </h3>
+          <div className="bg-white p-6" style={{ borderRadius: '14px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-bold text-base" style={{ color: '#1e2d3d' }}>EN FAIT</h3>
+                <p className="text-sm" style={{ color: '#6b7280' }}>{currentChef.chef_demande}</p>
+              </div>
               <button
                 onClick={() => generateSection(activeChef, 'fait')}
                 disabled={loadingSection === `${activeChef}-fait`}
-                className="text-xs px-3 py-1.5 rounded-lg font-medium text-white disabled:opacity-50"
-                style={{ backgroundColor: '#e8842c' }}
+                className="btn-primary"
+                style={{ padding: '0.5rem 1rem' }}
               >
-                {loadingSection === `${activeChef}-fait` ? '⏳ Génération...' : '🤖 Générer'}
+                {loadingSection === `${activeChef}-fait` ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Génération…
+                  </>
+                ) : '🤖 Générer'}
               </button>
             </div>
             <textarea
               value={currentChef.section_fait || ''}
               onChange={e => updateChef(activeChef, { section_fait: e.target.value })}
-              className="w-full px-3 py-3 rounded-lg border border-gray-200 text-sm focus:outline-none resize-none"
-              rows={10}
+              className="form-input"
+              rows={12}
               placeholder="La section EN FAIT sera générée par l'IA ou peut être saisie manuellement.
 
 Elle doit exposer :
@@ -177,19 +195,19 @@ Elle doit exposer :
             <button
               onClick={() => setActiveChef(Math.max(0, activeChef - 1))}
               disabled={activeChef === 0}
-              className="text-xs px-3 py-2 rounded-lg border disabled:opacity-30"
-              style={{ color: '#6b7280', borderColor: '#d1d5db' }}
+              className="text-sm px-4 py-2 rounded-xl border-2 font-semibold disabled:opacity-30 transition-colors"
+              style={{ color: '#6b7280', borderColor: '#e5e7eb' }}
             >
               ← Chef précédent
             </button>
-            <span className="text-xs" style={{ color: '#6b7280' }}>
+            <span className="text-sm font-medium" style={{ color: '#6b7280' }}>
               {activeChef + 1} / {chefs.length}
             </span>
             <button
               onClick={() => setActiveChef(Math.min(chefs.length - 1, activeChef + 1))}
               disabled={activeChef === chefs.length - 1}
-              className="text-xs px-3 py-2 rounded-lg border disabled:opacity-30"
-              style={{ color: '#6b7280', borderColor: '#d1d5db' }}
+              className="text-sm px-4 py-2 rounded-xl border-2 font-semibold disabled:opacity-30 transition-colors"
+              style={{ color: '#6b7280', borderColor: '#e5e7eb' }}
             >
               Chef suivant →
             </button>
@@ -197,14 +215,13 @@ Elle doit exposer :
         </div>
       )}
 
-      <div className="flex justify-between">
-        <button onClick={onBack} className="px-6 py-3 rounded-lg font-semibold text-sm border-2" style={{ color: '#1e2d3d', borderColor: '#1e2d3d' }}>
+      <div className="flex justify-between pt-2">
+        <button onClick={onBack} className="btn-secondary">
           ← Retour
         </button>
         <button
           onClick={onNext}
-          className="px-6 py-3 rounded-lg font-semibold text-white text-sm"
-          style={{ backgroundColor: '#e8842c' }}
+          className="btn-primary"
         >
           Générer les conclusions →
         </button>

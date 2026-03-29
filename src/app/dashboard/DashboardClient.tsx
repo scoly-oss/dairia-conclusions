@@ -25,97 +25,117 @@ export default function DashboardClient({ conclusions, userEmail }: { conclusion
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f8f8f6' }}>
       {/* Header */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <header className="bg-white sticky top-0 z-10" style={{ borderBottom: '1px solid #e5e7eb', boxShadow: '0 1px 8px rgba(0,0,0,0.05)' }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#1e2d3d' }}>
-              <span className="text-white font-bold">D</span>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1e2d3d' }}>
+              <span className="text-white font-bold text-base">D</span>
             </div>
-            <span className="font-bold text-lg" style={{ color: '#1e2d3d' }}>DAIRIA Conclusions</span>
+            <div className="hidden sm:block">
+              <span className="font-bold text-base" style={{ color: '#1e2d3d' }}>DAIRIA</span>
+              <span className="font-semibold text-base ml-1.5" style={{ color: '#e8842c' }}>Conclusions</span>
+            </div>
+            <div className="sm:hidden">
+              <span className="font-bold text-base" style={{ color: '#1e2d3d' }}>DAIRIA Conclusions</span>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm" style={{ color: '#6b7280' }}>{userEmail}</span>
-            <button onClick={handleLogout} className="text-sm font-medium" style={{ color: '#6b7280' }}>
+          <div className="flex items-center gap-3 sm:gap-5">
+            <span className="hidden sm:block text-sm" style={{ color: '#6b7280' }}>{userEmail}</span>
+            <button
+              onClick={handleLogout}
+              className="text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors"
+              style={{ color: '#6b7280' }}
+            >
               Déconnexion
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Hero */}
-        <div className="mb-8 flex items-center justify-between">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        {/* Page header */}
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold mb-1" style={{ color: '#1e2d3d' }}>Conclusions prud'homales</h1>
-            <p className="text-sm" style={{ color: '#6b7280' }}>Générez vos conclusions en défense employeur avec l'IA</p>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-1" style={{ color: '#1e2d3d' }}>
+              Conclusions prud&apos;homales
+            </h1>
+            <p className="text-base" style={{ color: '#6b7280' }}>
+              Générez vos conclusions en défense employeur avec l&apos;IA
+            </p>
           </div>
           <Link
             href="/conclusions/new"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white text-sm"
-            style={{ backgroundColor: '#e8842c' }}
+            className="btn-primary self-start sm:self-auto"
+            style={{ textDecoration: 'none' }}
           >
-            <span>+</span>
+            <span className="text-lg leading-none">+</span>
             Nouvelles conclusions
           </Link>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-3 sm:gap-5 mb-8">
           {[
-            { label: 'Total', value: conclusions.length },
-            { label: 'En cours', value: conclusions.filter(c => c.statut === 'en_cours').length },
-            { label: 'Finalisés', value: conclusions.filter(c => c.statut === 'finalise').length },
+            { label: 'Total', value: conclusions.length, icon: '📁' },
+            { label: 'En cours', value: conclusions.filter(c => c.statut === 'en_cours').length, icon: '⚡', accent: '#e8842c' },
+            { label: 'Finalisés', value: conclusions.filter(c => c.statut === 'finalise').length, icon: '✅', accent: '#16a34a' },
           ].map(stat => (
-            <div key={stat.label} className="bg-white rounded-xl p-5 border border-gray-100">
-              <p className="text-sm mb-1" style={{ color: '#6b7280' }}>{stat.label}</p>
-              <p className="text-2xl font-bold" style={{ color: '#1e2d3d' }}>{stat.value}</p>
+            <div key={stat.label} className="bg-white p-4 sm:p-6" style={{ borderRadius: '14px', border: '1px solid #e5e7eb', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <p className="text-xs sm:text-sm font-medium" style={{ color: '#6b7280' }}>{stat.label}</p>
+                <span className="hidden sm:block text-lg">{stat.icon}</span>
+              </div>
+              <p className="text-2xl sm:text-3xl font-bold" style={{ color: stat.accent || '#1e2d3d' }}>{stat.value}</p>
             </div>
           ))}
         </div>
 
-        {/* List */}
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-50">
-            <h2 className="font-semibold" style={{ color: '#1e2d3d' }}>Dossiers récents</h2>
+        {/* Conclusions list */}
+        <div className="bg-white overflow-hidden" style={{ borderRadius: '14px', border: '1px solid #e5e7eb', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+          <div className="px-5 sm:px-7 py-4 sm:py-5" style={{ borderBottom: '1px solid #f3f4f6' }}>
+            <h2 className="text-base font-bold" style={{ color: '#1e2d3d' }}>Dossiers récents</h2>
           </div>
 
           {conclusions.length === 0 ? (
-            <div className="py-16 text-center">
-              <p className="text-sm mb-4" style={{ color: '#6b7280' }}>Aucune conclusion pour le moment</p>
+            <div className="py-20 text-center">
+              <div className="text-5xl mb-5">📋</div>
+              <p className="text-base font-medium mb-2" style={{ color: '#1e2d3d' }}>Aucune conclusion pour le moment</p>
+              <p className="text-sm mb-6" style={{ color: '#6b7280' }}>Commencez par créer votre premier dossier</p>
               <Link
                 href="/conclusions/new"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white text-sm"
-                style={{ backgroundColor: '#e8842c' }}
+                className="btn-primary"
+                style={{ textDecoration: 'none' }}
               >
-                Créer mes premières conclusions
+                <span>+</span> Créer mes premières conclusions
               </Link>
             </div>
           ) : (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y" style={{ borderColor: '#f3f4f6' }}>
               {conclusions.map(c => {
                 const status = statusLabels[c.statut]
                 return (
                   <Link
                     key={c.id}
                     href={`/conclusions/${c.id}`}
-                    className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-between px-5 sm:px-7 py-4 sm:py-5 transition-colors hover:bg-gray-50"
+                    style={{ textDecoration: 'none' }}
                   >
-                    <div>
-                      <p className="font-medium text-sm mb-0.5" style={{ color: '#1e2d3d' }}>
-                        {c.societe_info?.nom} c/ {c.salarie_info?.nom} {c.salarie_info?.prenom}
+                    <div className="min-w-0 flex-1 mr-4">
+                      <p className="font-semibold text-sm sm:text-base mb-0.5 truncate" style={{ color: '#1e2d3d' }}>
+                        {c.societe_info?.nom} <span style={{ color: '#6b7280' }}>c/</span> {c.salarie_info?.nom} {c.salarie_info?.prenom}
                       </p>
-                      <p className="text-xs" style={{ color: '#6b7280' }}>
+                      <p className="text-xs sm:text-sm truncate" style={{ color: '#6b7280' }}>
                         {c.juridiction} — RG {c.n_rg} — Concl. n°{c.numero_conclusions}
                       </p>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 sm:gap-5 flex-shrink-0">
                       <span
-                        className="text-xs font-medium px-2.5 py-1 rounded-full"
+                        className="badge"
                         style={{ color: status.color, backgroundColor: status.bg }}
                       >
                         {status.label}
                       </span>
-                      <span className="text-xs" style={{ color: '#6b7280' }}>
+                      <span className="hidden sm:block text-sm" style={{ color: '#9ca3af' }}>
                         {format(new Date(c.created_at), 'd MMM yyyy', { locale: fr })}
                       </span>
                     </div>

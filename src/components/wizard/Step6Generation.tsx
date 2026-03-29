@@ -42,7 +42,7 @@ export default function Step6Generation({ state, updateState, onBack, conclusion
       } else {
         setError('Erreur lors de la génération')
       }
-    } catch (e) {
+    } catch {
       setError('Erreur de connexion')
     } finally {
       setLoading(false)
@@ -68,18 +68,18 @@ export default function Step6Generation({ state, updateState, onBack, conclusion
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold mb-1" style={{ color: '#1e2d3d' }}>Génération des conclusions</h2>
-        <p className="text-sm" style={{ color: '#6b7280' }}>L'IA assemble les conclusions complètes prêtes à être déposées</p>
+    <div className="space-y-5">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold mb-1" style={{ color: '#1e2d3d' }}>Génération des conclusions</h2>
+        <p className="text-base" style={{ color: '#6b7280' }}>L&apos;IA assemble les conclusions complètes prêtes à être déposées</p>
       </div>
 
       {!generated ? (
-        <div className="bg-white rounded-xl border border-gray-100 p-8 text-center">
+        <div className="bg-white p-8 sm:p-10" style={{ borderRadius: '14px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
           {/* Summary */}
-          <div className="mb-6 text-left max-w-sm mx-auto">
-            <h3 className="font-semibold mb-3 text-sm text-center" style={{ color: '#1e2d3d' }}>Récapitulatif</h3>
-            <div className="space-y-2">
+          <div className="mb-8 max-w-sm mx-auto">
+            <h3 className="font-bold text-base text-center mb-4" style={{ color: '#1e2d3d' }}>Récapitulatif du dossier</h3>
+            <div className="space-y-2.5">
               <SummaryRow label="Affaire" value={`${state.conclusion?.societe_info?.nom} c/ ${state.conclusion?.salarie_info?.nom} ${state.conclusion?.salarie_info?.prenom}`} />
               <SummaryRow label="Juridiction" value={state.conclusion?.juridiction || '-'} />
               <SummaryRow label="N° RG" value={state.conclusion?.n_rg || '-'} />
@@ -91,83 +91,83 @@ export default function Step6Generation({ state, updateState, onBack, conclusion
           </div>
 
           {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200">
+              <p className="text-sm text-red-600 font-medium">{error}</p>
             </div>
           )}
 
-          <button
-            onClick={generate}
-            disabled={loading}
-            className="px-8 py-4 rounded-xl font-bold text-white text-base disabled:opacity-50"
-            style={{ backgroundColor: '#e8842c' }}
-          >
-            {loading ? (
-              <span className="flex items-center gap-3">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Génération en cours... (60-90 secondes)
-              </span>
-            ) : '⚡ Générer les conclusions complètes'}
-          </button>
+          <div className="flex justify-center">
+            <button
+              onClick={generate}
+              disabled={loading}
+              className="btn-primary text-base"
+              style={{ padding: '1rem 2.5rem' }}
+            >
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Génération en cours… (60-90 sec)
+                </>
+              ) : '⚡ Générer les conclusions complètes'}
+            </button>
+          </div>
 
           {loading && (
-            <p className="text-xs mt-4" style={{ color: '#6b7280' }}>
-              L'IA rédige vos conclusions selon la méthodologie DAIRIA...
+            <p className="text-sm mt-5 text-center" style={{ color: '#6b7280' }}>
+              L&apos;IA rédige vos conclusions selon la méthodologie DAIRIA…
             </p>
           )}
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {/* Actions */}
           <div className="flex gap-3 flex-wrap">
             <button
               onClick={copyToClipboard}
-              className="px-4 py-2 rounded-lg text-sm font-medium border-2"
-              style={{ color: '#1e2d3d', borderColor: '#1e2d3d' }}
+              className="btn-secondary"
             >
               {copied ? '✓ Copié !' : '📋 Copier'}
             </button>
             <button
               onClick={downloadTxt}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-white"
-              style={{ backgroundColor: '#1e2d3d' }}
+              className="btn-primary"
             >
               💾 Télécharger (.txt)
             </button>
             <Link
               href="/dashboard"
-              className="px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ color: '#6b7280' }}
+              className="btn-secondary"
+              style={{ textDecoration: 'none' }}
             >
-              ← Retour au tableau de bord
+              ← Tableau de bord
             </Link>
           </div>
 
           {/* Document preview */}
-          <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-              <h3 className="font-semibold text-sm" style={{ color: '#1e2d3d' }}>Prévisualisation des conclusions</h3>
-              <span className="text-xs px-2 py-1 rounded-full font-medium" style={{ backgroundColor: '#f0fdf4', color: '#16a34a' }}>
+          <div className="bg-white overflow-hidden" style={{ borderRadius: '14px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+            <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #f3f4f6' }}>
+              <h3 className="font-bold text-base" style={{ color: '#1e2d3d' }}>Prévisualisation des conclusions</h3>
+              <span className="badge" style={{ backgroundColor: '#f0fdf4', color: '#16a34a' }}>
                 ✓ Généré
               </span>
             </div>
             <textarea
               value={documentText}
               onChange={e => setDocumentText(e.target.value)}
-              className="w-full px-6 py-4 text-sm font-mono focus:outline-none resize-none"
+              className="w-full px-6 py-5 text-sm font-mono focus:outline-none resize-none"
               rows={40}
-              style={{ color: '#1e2d3d', lineHeight: '1.8' }}
+              style={{ color: '#1e2d3d', lineHeight: '1.9', backgroundColor: 'white' }}
             />
           </div>
         </div>
       )}
 
       {!generated && (
-        <div className="flex justify-start">
-          <button onClick={onBack} className="px-6 py-3 rounded-lg font-semibold text-sm border-2" style={{ color: '#1e2d3d', borderColor: '#1e2d3d' }}>
+        <div className="flex justify-start pt-2">
+          <button onClick={onBack} className="btn-secondary">
             ← Retour
           </button>
         </div>
@@ -178,9 +178,9 @@ export default function Step6Generation({ state, updateState, onBack, conclusion
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between text-sm">
+    <div className="flex justify-between items-baseline text-sm gap-4">
       <span style={{ color: '#6b7280' }}>{label}</span>
-      <span className="font-medium" style={{ color: '#1e2d3d' }}>{value}</span>
+      <span className="font-semibold text-right" style={{ color: '#1e2d3d' }}>{value}</span>
     </div>
   )
 }

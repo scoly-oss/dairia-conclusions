@@ -49,15 +49,12 @@ export default function Step2Pieces({ state, updateState, onNext, onBack }: Prop
     if (!file) return
 
     setUploading(true)
-    // Read file content for text extraction (for PDF/DOCX we'll use the file name for now)
     addPiece(file.name.replace(/\.[^.]+$/, ''), 'conclusions_adverses', file)
 
-    // For text files, extract content
     if (file.type === 'text/plain') {
       const text = await file.text()
       updateState({ conclusionsAdversesText: text })
     } else {
-      // For PDF/DOCX, we'll analyze in step 3 via AI
       updateState({ conclusionsAdversesText: `[Fichier uploadé: ${file.name}]` })
     }
     setUploading(false)
@@ -71,25 +68,25 @@ export default function Step2Pieces({ state, updateState, onNext, onBack }: Prop
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold mb-1" style={{ color: '#1e2d3d' }}>Pièces du dossier</h2>
-        <p className="text-sm" style={{ color: '#6b7280' }}>Uploadez les conclusions adverses et les pièces du dossier</p>
+    <div className="space-y-5">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold mb-1" style={{ color: '#1e2d3d' }}>Pièces du dossier</h2>
+        <p className="text-base" style={{ color: '#6b7280' }}>Uploadez les conclusions adverses et les pièces du dossier</p>
       </div>
 
       {/* Conclusions adverses */}
-      <div className="bg-white rounded-xl border-2 border-dashed p-6" style={{ borderColor: '#e8842c' }}>
-        <div className="flex items-start justify-between">
+      <div className="bg-white p-6" style={{ borderRadius: '14px', border: '2px dashed #e8842c', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+        <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="font-semibold mb-1 text-sm" style={{ color: '#1e2d3d' }}>
+            <h3 className="card-title" style={{ marginBottom: '0.25rem' }}>
               Conclusions adverses <span className="text-red-500">*</span>
             </h3>
-            <p className="text-xs mb-3" style={{ color: '#6b7280' }}>
-              L'IA analysera ce document pour extraire les chefs de demande
+            <p className="text-sm" style={{ color: '#6b7280' }}>
+              L&apos;IA analysera ce document pour extraire les chefs de demande
             </p>
           </div>
-          <label className="cursor-pointer px-4 py-2 rounded-lg text-xs font-semibold text-white" style={{ backgroundColor: '#e8842c' }}>
-            {uploading ? 'Upload...' : '+ Ajouter'}
+          <label className="btn-primary cursor-pointer text-sm" style={{ padding: '0.5rem 1rem' }}>
+            {uploading ? 'Upload…' : '+ Ajouter'}
             <input
               type="file"
               accept=".pdf,.docx,.txt"
@@ -102,17 +99,17 @@ export default function Step2Pieces({ state, updateState, onNext, onBack }: Prop
         {piecesByType.conclusions_adverses.length > 0 ? (
           <div className="space-y-2">
             {piecesByType.conclusions_adverses.map(p => (
-              <div key={p.id} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: '#fef3ec' }}>
+              <div key={p.id} className="flex items-center justify-between p-3 rounded-xl" style={{ backgroundColor: '#fef3ec' }}>
                 <div className="flex items-center gap-2">
                   <span className="text-lg">📄</span>
-                  <span className="text-sm font-medium" style={{ color: '#1e2d3d' }}>{p.titre}</span>
+                  <span className="text-sm font-semibold" style={{ color: '#1e2d3d' }}>{p.titre}</span>
                 </div>
-                <button onClick={() => removePiece(p.id!)} className="text-xs" style={{ color: '#6b7280' }}>✕</button>
+                <button onClick={() => removePiece(p.id!)} className="text-sm w-6 h-6 rounded-full flex items-center justify-center hover:bg-orange-100" style={{ color: '#6b7280' }}>✕</button>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-xs text-center py-4" style={{ color: '#9ca3af' }}>Aucun fichier uploadé</p>
+          <p className="text-sm text-center py-6" style={{ color: '#9ca3af' }}>Aucun fichier uploadé</p>
         )}
       </div>
 
@@ -138,14 +135,13 @@ export default function Step2Pieces({ state, updateState, onNext, onBack }: Prop
         onAddManual={(titre) => addPiece(titre, 'adverse')}
       />
 
-      <div className="flex justify-between">
-        <button onClick={onBack} className="px-6 py-3 rounded-lg font-semibold text-sm border-2" style={{ color: '#1e2d3d', borderColor: '#1e2d3d' }}>
+      <div className="flex justify-between pt-2">
+        <button onClick={onBack} className="btn-secondary">
           ← Retour
         </button>
         <button
           onClick={onNext}
-          className="px-6 py-3 rounded-lg font-semibold text-white text-sm"
-          style={{ backgroundColor: '#e8842c' }}
+          className="btn-primary"
         >
           Étape suivante →
         </button>
@@ -167,21 +163,21 @@ function PieceSection({ title, subtitle, pieces, type, onUpload, onRemove, onAdd
   const [manualTitle, setManualTitle] = useState('')
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-6">
+    <div className="bg-white p-6" style={{ borderRadius: '14px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="font-semibold mb-0.5 text-sm" style={{ color: '#1e2d3d' }}>{title}</h3>
-          <p className="text-xs" style={{ color: '#6b7280' }}>{subtitle}</p>
+          <h3 className="card-title" style={{ marginBottom: '0.125rem' }}>{title}</h3>
+          <p className="text-sm" style={{ color: '#6b7280' }}>{subtitle}</p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => setShowManual(!showManual)}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium border"
-            style={{ color: '#1e2d3d', borderColor: '#d1d5db' }}
+            className="px-3 py-1.5 rounded-lg text-sm font-semibold border-2 transition-colors"
+            style={{ color: '#1e2d3d', borderColor: '#1e2d3d' }}
           >
             + Manuel
           </button>
-          <label className="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-medium text-white" style={{ backgroundColor: '#1e2d3d' }}>
+          <label className="cursor-pointer px-3 py-1.5 rounded-lg text-sm font-semibold text-white" style={{ backgroundColor: '#1e2d3d', borderRadius: '8px' }}>
             + Upload
             <input type="file" accept=".pdf,.docx" multiple className="hidden" onChange={e => onUpload(e, type)} />
           </label>
@@ -195,13 +191,13 @@ function PieceSection({ title, subtitle, pieces, type, onUpload, onRemove, onAdd
             value={manualTitle}
             onChange={e => setManualTitle(e.target.value)}
             placeholder="Titre de la pièce"
-            className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none"
+            className="form-input flex-1"
           />
           <button
             onClick={() => { onAddManual(manualTitle); setManualTitle(''); setShowManual(false) }}
             disabled={!manualTitle}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-40"
-            style={{ backgroundColor: '#e8842c' }}
+            className="btn-primary"
+            style={{ padding: '0.625rem 1rem' }}
           >
             Ajouter
           </button>
@@ -209,18 +205,18 @@ function PieceSection({ title, subtitle, pieces, type, onUpload, onRemove, onAdd
       )}
 
       {pieces.length === 0 ? (
-        <p className="text-xs text-center py-4" style={{ color: '#9ca3af' }}>Aucune pièce ajoutée</p>
+        <p className="text-sm text-center py-6" style={{ color: '#9ca3af' }}>Aucune pièce ajoutée</p>
       ) : (
         <div className="space-y-2">
           {pieces.map((p, i) => (
-            <div key={p.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+            <div key={p.id} className="flex items-center justify-between p-3 rounded-xl" style={{ backgroundColor: '#f9fafb' }}>
               <div className="flex items-center gap-3">
-                <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: '#1e2d3d' }}>
+                <span className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: '#1e2d3d' }}>
                   {i + 1}
                 </span>
-                <span className="text-sm" style={{ color: '#1e2d3d' }}>{p.titre}</span>
+                <span className="text-sm font-medium" style={{ color: '#1e2d3d' }}>{p.titre}</span>
               </div>
-              <button onClick={() => onRemove(p.id!)} className="text-xs" style={{ color: '#9ca3af' }}>✕</button>
+              <button onClick={() => onRemove(p.id!)} className="text-sm w-6 h-6 rounded-full flex items-center justify-center hover:bg-gray-200" style={{ color: '#9ca3af' }}>✕</button>
             </div>
           ))}
         </div>

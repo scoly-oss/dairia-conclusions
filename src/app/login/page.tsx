@@ -29,71 +29,88 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f8f8f6' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ backgroundColor: '#f8f8f6' }}>
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#1e2d3d' }}>
-              <span className="text-white font-bold text-lg">D</span>
+
+        {/* Logo */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-3 mb-5">
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm"
+              style={{ backgroundColor: '#1e2d3d' }}
+            >
+              <span className="text-white font-bold text-xl">D</span>
             </div>
-            <span className="text-2xl font-bold" style={{ color: '#1e2d3d' }}>DAIRIA Conclusions</span>
+            <div className="text-left">
+              <div className="text-xl font-bold leading-tight" style={{ color: '#1e2d3d' }}>DAIRIA</div>
+              <div className="text-sm font-medium" style={{ color: '#e8842c' }}>Conclusions</div>
+            </div>
           </div>
-          <p className="text-sm" style={{ color: '#6b7280' }}>Générateur de conclusions prud'homales</p>
+          <p className="text-base" style={{ color: '#6b7280' }}>
+            Générateur de conclusions prud&apos;homales
+          </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          <h1 className="text-xl font-semibold mb-6" style={{ color: '#1e2d3d' }}>Connexion</h1>
+        {/* Card */}
+        <div className="bg-white p-8 sm:p-10" style={{ borderRadius: '14px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', border: '1px solid #e5e7eb' }}>
+          <h1 className="text-2xl font-bold mb-2" style={{ color: '#1e2d3d' }}>Connexion</h1>
+          <p className="text-sm mb-8" style={{ color: '#6b7280' }}>Accédez à votre espace DAIRIA Avocats</p>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: '#1e2d3d' }}>
-                Email
-              </label>
+              <label className="form-label">Adresse email</label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:border-transparent"
-                style={{ '--tw-ring-color': '#e8842c' } as React.CSSProperties}
+                className="form-input"
                 placeholder="avocat@dairia-avocats.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: '#1e2d3d' }}>
-                Mot de passe
-              </label>
+              <label className="form-label">Mot de passe</label>
               <input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
-                className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:border-transparent"
+                className="form-input"
                 placeholder="••••••••"
               />
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="p-4 rounded-xl bg-red-50 border border-red-200">
+                <p className="text-sm text-red-600 font-medium">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-lg font-semibold text-white transition-opacity disabled:opacity-50"
-              style={{ backgroundColor: '#e8842c' }}
+              className="btn-primary w-full justify-center mt-2"
+              style={{ padding: '0.875rem 1.75rem' }}
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Connexion en cours…
+                </>
+              ) : 'Se connecter'}
             </button>
           </form>
         </div>
 
-        <p className="text-center text-xs mt-6" style={{ color: '#6b7280' }}>
-          DAIRIA Avocats — Barreau de Lyon
-        </p>
+        {/* Footer */}
+        <div className="text-center mt-8">
+          <p className="text-sm font-medium" style={{ color: '#6b7280' }}>DAIRIA Avocats</p>
+          <p className="text-xs mt-1" style={{ color: '#9ca3af' }}>Barreau de Lyon</p>
+        </div>
       </div>
     </div>
   )
