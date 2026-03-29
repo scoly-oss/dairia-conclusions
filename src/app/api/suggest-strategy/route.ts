@@ -1,10 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { requireAuth } from '@/lib/auth-guard'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+const MAX_BODY_SIZE = 10_000 // 10 KB
+
 export async function POST(request: NextRequest) {
+  // Auth check
+  const { user, error: authError } = await requireAuth()
+  if (authError) return authError
+
+  // Rate limiting: 60 strategy suggestions per hour per user
+  if (!checkRateLimit(`suggest-strategy:${user!.id}`, { limit: 60, windowSec: 3600 })) {
+    return NextResponse.json(
+      { error: 'Trop de requêtes. Réessayez dans une heure.' },
+      { status: 429 }
+    )
+  }
+
+  // Input size validation
+  const contentLength = request.headers.get('content-length')
+  if (contentLength && parseInt(contentLength) > MAX_BODY_SIZE) {
+    return NextResponse.json({ error: 'Requête trop volumineuse' }, { status: 413 })
+  }
+
   const { chef, dossierInfo } = await request.json()
+
+  if (!chef) {
+    return NextResponse.json({ error: 'Données manquantes' }, { status: 400 })
+  }
 
   try {
     const message = await anthropic.messages.create({
